@@ -334,7 +334,7 @@ const App: React.FC = () => {
               <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10 group shadow-2xl">
                 <img 
                   src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Crowd" 
+                  alt="Crowd enjoying immersive light art at LUMINA 2025 Tokyo" 
                   className="h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 will-change-transform" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
