@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -7,7 +8,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Artist } from '../types';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Twitter, Facebook } from 'lucide-react';
 
 interface ArtistCardProps {
   artist: Artist;
@@ -15,6 +16,20 @@ interface ArtistCardProps {
 }
 
 const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick }) => {
+  const shareUrl = "https://filmfind.online";
+  const shareText = `Check out ${artist.name} at LUMINA 2025! #LUMINA2025`;
+
+  const handleShare = (e: React.MouseEvent, platform: 'twitter' | 'facebook') => {
+    e.stopPropagation();
+    let url = '';
+    if (platform === 'twitter') {
+      url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    } else if (platform === 'facebook') {
+      url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    }
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
   return (
     <motion.div
       className="group relative h-[400px] md:h-[500px] w-full overflow-hidden border-b md:border-r border-white/10 bg-black cursor-pointer"
@@ -46,15 +61,48 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, onClick }) => {
            <span className="text-xs font-mono border border-white/30 px-2 py-1 rounded-full backdrop-blur-md">
              {artist.day}
            </span>
-           <motion.div
-             variants={{
-               rest: { opacity: 0, x: 20, y: -20 },
-               hover: { opacity: 1, x: 0, y: 0 }
-             }}
-             className="bg-white text-black rounded-full p-2 will-change-transform"
-           >
-             <ArrowUpRight className="w-6 h-6" />
-           </motion.div>
+           
+           <div className="flex gap-3 items-center pointer-events-auto">
+             {/* Share Buttons */}
+             <motion.button
+                variants={{
+                  rest: { opacity: 0, x: 20, scale: 0.8 },
+                  hover: { opacity: 1, x: 0, scale: 1 }
+                }}
+                transition={{ duration: 0.4, delay: 0.05 }}
+                onClick={(e) => handleShare(e, 'twitter')}
+                className="flex items-center justify-center w-8 h-8 bg-black/50 hover:bg-[#1DA1F2] hover:text-white text-white border border-white/20 rounded-full backdrop-blur-md transition-colors"
+                aria-label="Share on Twitter"
+                title="Share on Twitter"
+             >
+                <Twitter className="w-4 h-4" />
+             </motion.button>
+             
+             <motion.button
+                variants={{
+                  rest: { opacity: 0, x: 20, scale: 0.8 },
+                  hover: { opacity: 1, x: 0, scale: 1 }
+                }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                onClick={(e) => handleShare(e, 'facebook')}
+                className="flex items-center justify-center w-8 h-8 bg-black/50 hover:bg-[#4267B2] hover:text-white text-white border border-white/20 rounded-full backdrop-blur-md transition-colors"
+                aria-label="Share on Facebook"
+                title="Share on Facebook"
+             >
+                <Facebook className="w-4 h-4" />
+             </motion.button>
+
+             {/* View Details Arrow */}
+             <motion.div
+               variants={{
+                 rest: { opacity: 0, x: 20, y: -20 },
+                 hover: { opacity: 1, x: 0, y: 0 }
+               }}
+               className="bg-white text-black rounded-full p-2 will-change-transform ml-1"
+             >
+               <ArrowUpRight className="w-6 h-6" />
+             </motion.div>
+           </div>
         </div>
 
         <div>

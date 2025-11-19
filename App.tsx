@@ -73,9 +73,31 @@ const App: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [filterDay, setFilterDay] = useState('ALL');
   
   const [purchasingIndex, setPurchasingIndex] = useState<number | null>(null);
   const [purchasedIndex, setPurchasedIndex] = useState<number | null>(null);
+
+  const filteredLineup = filterDay === 'ALL' 
+    ? LINEUP 
+    : LINEUP.filter(artist => artist.day === filterDay);
+
+  const navigateArtist = (direction: 'next' | 'prev') => {
+    if (!selectedArtist) return;
+    
+    // Navigate within the currently filtered list
+    // Fallback to full lineup if selected artist isn't in current filter (edge case)
+    const sourceList = filteredLineup.some(a => a.id === selectedArtist.id) ? filteredLineup : LINEUP;
+    
+    const currentIndex = sourceList.findIndex(a => a.id === selectedArtist.id);
+    let nextIndex;
+    if (direction === 'next') {
+      nextIndex = (currentIndex + 1) % sourceList.length;
+    } else {
+      nextIndex = (currentIndex - 1 + sourceList.length) % sourceList.length;
+    }
+    setSelectedArtist(sourceList[nextIndex]);
+  };
 
   // Handle keyboard navigation for artist modal
   useEffect(() => {
@@ -87,7 +109,7 @@ const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedArtist]);
+  }, [selectedArtist, filterDay]); // Added filterDay dependency to ensure navigation uses correct list
 
   const handlePurchase = (index: number) => {
     setPurchasingIndex(index);
@@ -110,18 +132,6 @@ const App: React.FC = () => {
         behavior: 'smooth'
       });
     }
-  };
-
-  const navigateArtist = (direction: 'next' | 'prev') => {
-    if (!selectedArtist) return;
-    const currentIndex = LINEUP.findIndex(a => a.id === selectedArtist.id);
-    let nextIndex;
-    if (direction === 'next') {
-      nextIndex = (currentIndex + 1) % LINEUP.length;
-    } else {
-      nextIndex = (currentIndex - 1 + LINEUP.length) % LINEUP.length;
-    }
-    setSelectedArtist(LINEUP[nextIndex]);
   };
   
   return (
@@ -279,12 +289,36 @@ const App: React.FC = () => {
               Sonic <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3]">Waves</span>
             </h2>
+
+            {/* Filter Buttons */}
+            <div className="flex gap-3 mt-8 md:mt-0 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+              {['ALL', 'FRI 24', 'SAT 25', 'SUN 26'].map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setFilterDay(day)}
+                  className={`px-5 py-2 text-xs md:text-sm font-bold tracking-widest uppercase border transition-all duration-300 whitespace-nowrap ${
+                    filterDay === day 
+                      ? 'bg-[#a8fbd3] text-black border-[#a8fbd3] shadow-[0_0_20px_rgba(168,251,211,0.3)]' 
+                      : 'bg-transparent text-white/60 border-white/20 hover:border-white hover:text-white'
+                  }`}
+                  data-hover="true"
+                >
+                  {day === 'ALL' ? 'Full Lineup' : day}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm">
-            {LINEUP.map((artist) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm min-h-[400px]">
+            {filteredLineup.map((artist) => (
               <ArtistCard key={artist.id} artist={artist} onClick={() => setSelectedArtist(artist)} />
             ))}
+            {filteredLineup.length === 0 && (
+              <div className="col-span-full h-[400px] flex flex-col items-center justify-center text-white/30 gap-4">
+                <Music className="w-12 h-12 opacity-50" />
+                <p className="font-mono uppercase tracking-widest">No artists scheduled</p>
+              </div>
+            )}
           </div>
         </div>
         
