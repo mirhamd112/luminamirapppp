@@ -1,4 +1,5 @@
 
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -6,7 +7,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Menu, X, Search, Users, Star, Database, ShieldCheck, Film, Tv, Radio } from 'lucide-react';
+import { Menu, X, Search, Users, Star, Database, ShieldCheck, Film, Tv, Radio, Heart } from 'lucide-react';
 import FluidBackground from './components/FluidBackground';
 import GradientText from './components/GlitchText';
 import CustomCursor from './components/CustomCursor';
@@ -25,8 +26,8 @@ const App: React.FC = () => {
     offset: ["start end", "end start"]
   });
   
+  // Removed 3D rotation for better performance
   const parallaxY = useTransform(featureScroll, [0, 1], [50, -50]);
-  const rotateX = useTransform(featureScroll, [0, 0.5, 1], [5, 0, -5]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -52,7 +53,7 @@ const App: React.FC = () => {
       
       {/* Floating Navigation */}
       <div className="fixed top-6 left-0 right-0 z-40 flex justify-center px-4">
-        <nav className="w-full max-w-5xl flex items-center justify-between px-6 py-3 bg-[#0f1021]/70 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all hover:border-white/20">
+        <nav className="w-full max-w-5xl flex items-center justify-between px-6 py-3 bg-[#0f1021]/80 backdrop-blur-md border border-white/10 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all hover:border-white/20">
           
           {/* Logo */}
           <div 
@@ -105,7 +106,7 @@ const App: React.FC = () => {
             animate={{ opacity: 1, clipPath: "circle(150% at 100% 0%)" }}
             exit={{ opacity: 0, clipPath: "circle(0% at 100% 0%)" }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="fixed inset-0 z-30 bg-[#0f1021]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden"
+            className="fixed inset-0 z-30 bg-[#0f1021]/95 backdrop-blur-md flex flex-col items-center justify-center gap-8 md:hidden"
           >
             {['Discover', 'Features', 'Community', 'FAQ'].map((item) => (
               <button
@@ -131,7 +132,7 @@ const App: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-[#a8fbd3] tracking-[0.2em] uppercase mb-8 bg-white/5 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10 shadow-[0_0_20px_rgba(168,251,211,0.1)]"
+            className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-[#a8fbd3] tracking-[0.2em] uppercase mb-8 bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-[0_0_20px_rgba(168,251,211,0.1)]"
           >
             <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" />
             <span>Verified Secure • Family Friendly</span>
@@ -194,7 +195,7 @@ const App: React.FC = () => {
       </header>
 
       {/* FEATURES SECTION */}
-      <section id="features" ref={featureRef} className="relative z-10 py-20 md:py-32 bg-black/20 backdrop-blur-sm overflow-hidden">
+      <section id="features" ref={featureRef} className="relative z-10 py-20 md:py-32 bg-black/20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           
           {/* Feature 1 */}
@@ -216,8 +217,8 @@ const App: React.FC = () => {
              </motion.div>
              
              <motion.div 
-               style={{ y: parallaxY, rotateX: rotateX }}
-               className="order-1 md:order-2 relative h-[400px] md:h-[500px] bg-[#0f1021] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl group perspective-1000 flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(168,251,211,0.15)] hover:border-[#a8fbd3]/30"
+               style={{ y: parallaxY }}
+               className="order-1 md:order-2 relative h-[400px] md:h-[500px] bg-[#0f1021] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl group flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(168,251,211,0.15)] hover:border-[#a8fbd3]/30"
              >
                 {/* Image is key focus here, used object-contain to show the UI element clearly */}
                 <img 
@@ -365,7 +366,17 @@ const App: React.FC = () => {
              </p>
           </div>
           
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
+            <a 
+              href="https://tirikchilik.uz/mirhamid" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3] text-[#0f1021] rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_15px_rgba(79,183,179,0.4)]"
+            >
+               <Heart className="w-3 h-3 fill-current" />
+               <span>Donate</span>
+            </a>
+
             <a href="https://instagram.com/filmfind.online" className="text-gray-400 hover:text-[#E1306C] transition-colors transform hover:scale-110" aria-label="Instagram">
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
             </a>

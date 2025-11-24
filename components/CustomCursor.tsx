@@ -5,11 +5,12 @@
 */
 
 import React, { useEffect, useState } from 'react';
-import { motion, useSpring, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useSpring, useMotionValue } from 'framer-motion';
 
 const CustomCursor: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
   // Initialize off-screen
   const mouseX = useMotionValue(-100);
@@ -21,17 +22,33 @@ const CustomCursor: React.FC = () => {
   const y = useSpring(mouseY, springConfig);
 
   useEffect(() => {
+    // Only enable on non-touch, larger screens to save performance
+    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) {
+      return;
+    }
+
+    setIsVisible(true);
+
+    let rafId: number;
+
     const updateMousePosition = (e: MouseEvent) => {
+      // Direct updates to motion values are cheap
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
 
-      const target = e.target as HTMLElement;
-      const clickable = target.closest('button') || 
-                        target.closest('a') || 
-                        target.closest('[data-hover="true"]') ||
-                        target.tagName === 'INPUT' ||
-                        target.tagName === 'IMG';
-      setIsHovering(!!clickable);
+      // Throttling the expensive DOM traversal for hover detection
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const target = e.target as HTMLElement;
+        // Optimized check
+        const clickable = target.closest('button') || 
+                          target.closest('a') || 
+                          target.closest('[data-hover="true"]') ||
+                          target.tagName === 'INPUT' ||
+                          (target.tagName === 'IMG' && target.parentElement?.tagName === 'A');
+        
+        setIsHovering(!!clickable);
+      });
     };
 
     const handleMouseDown = () => setIsClicking(true);
@@ -45,12 +62,15 @@ const CustomCursor: React.FC = () => {
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      cancelAnimationFrame(rafId);
     };
   }, [mouseX, mouseY]);
 
+  if (!isVisible) return null;
+
   return (
     <motion.div
-      className="fixed top-0 left-0 z-[9999] pointer-events-none hidden md:flex items-center justify-center"
+      className="fixed top-0 left-0 z-[9999] pointer-events-none hidden md:flex items-center justify-center will-change-transform"
       style={{ x, y, translateX: '-50%', translateY: '-50%' }}
     >
       <div className="relative flex items-center justify-center">
@@ -77,7 +97,7 @@ const CustomCursor: React.FC = () => {
           className="absolute border border-dashed border-[#4fb7b3] rounded-full w-12 h-12"
         />
 
-        {/* Outer Static Ring (New) */}
+        {/* Outer Static Ring */}
          <motion.div
           animate={{
             scale: isClicking ? 0.9 : 1,
@@ -102,17 +122,6 @@ const CustomCursor: React.FC = () => {
           <span className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#a8fbd3] shadow-[0_0_10px_#a8fbd3]" />
           <span className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#a8fbd3] shadow-[0_0_10px_#a8fbd3]" />
           <span className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#a8fbd3] shadow-[0_0_10px_#a8fbd3]" />
-        </motion.div>
-
-        {/* Data Readout */}
-        <motion.div
-          animate={{
-            opacity: isHovering ? 1 : 0,
-            x: isHovering ? 50 : 30
-          }}
-          className="absolute left-0 top-0 text-[10px] font-mono text-[#a8fbd3] whitespace-nowrap flex flex-col gap-0.5 font-bold"
-        >
-          <span className="bg-black/50 px-1">TARGET_LOCKED</span>
         </motion.div>
       </div>
     </motion.div>

@@ -4,123 +4,48 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-
-import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
-
-const StarField = () => {
-  // Reduced star count for performance
-  const stars = useMemo(() => {
-    return Array.from({ length: 20 }).map((_, i) => ({
-      id: i,
-      size: Math.random() * 2 + 1,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 3 + 2,
-      delay: Math.random() * 2,
-      opacity: Math.random() * 0.7 + 0.3
-    }));
-  }, []);
-
-  return (
-    <div className="absolute inset-0 z-0 pointer-events-none">
-      {stars.map((star) => (
-        <motion.div
-          key={star.id}
-          className="absolute rounded-full bg-white will-change-[opacity,transform]"
-          style={{
-            left: `${star.x}%`,
-            top: `${star.y}%`,
-            width: star.size,
-            height: star.size,
-            transform: 'translateZ(0)'
-          }}
-          initial={{ opacity: star.opacity, scale: 1 }}
-          animate={{
-            opacity: [star.opacity, 1, star.opacity],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: star.duration * 2, // Slower animation
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: star.delay,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+import React, { memo } from 'react';
 
 const FluidBackground: React.FC = () => {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#0f1021]">
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#0f1021] pointer-events-none">
       
-      {/* Sci-Fi Grid Overlay */}
+      {/* Base Gradient - Static */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,24,39,1),rgba(15,16,33,1))]"></div>
+      
+      {/* Optimized Blobs - CSS Animation only, Removed heavy blend modes, standard blur */}
+      {/* Blob 1 */}
       <div 
-        className="absolute inset-0 opacity-10 pointer-events-none"
+        className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-[#a8fbd3] rounded-full filter blur-3xl opacity-[0.05] animate-blob will-change-transform" 
+      />
+      
+      {/* Blob 2 */}
+      <div 
+        className="absolute top-[20%] right-[-10%] w-[60vw] h-[60vw] bg-[#4fb7b3] rounded-full filter blur-3xl opacity-[0.05] animate-blob animation-delay-2000 will-change-transform" 
+      />
+      
+      {/* Blob 3 */}
+      <div 
+        className="absolute bottom-[-10%] left-[10%] w-[60vw] h-[60vw] bg-[#637ab9] rounded-full filter blur-3xl opacity-[0.05] animate-blob animation-delay-4000 will-change-transform" 
+      />
+
+      {/* Lightweight Grid Overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.02]"
         style={{
-          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
-          maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)'
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
         }}
       />
 
-      <StarField />
-
-      {/* Blob 1: Mint - Optimized Blur and Animation Speed */}
-      <motion.div
-        className="absolute top-[-10%] left-[-10%] w-[90vw] h-[90vw] bg-[#a8fbd3] rounded-full mix-blend-screen filter blur-[80px] opacity-20 will-change-transform"
-        animate={{
-          x: [0, 50, -25, 0],
-          y: [0, -25, 25, 0],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        style={{ transform: 'translateZ(0)' }}
-      />
-
-      {/* Blob 2: Teal */}
-      <motion.div
-        className="absolute top-[20%] right-[-20%] w-[100vw] h-[80vw] bg-[#4fb7b3] rounded-full mix-blend-screen filter blur-[80px] opacity-10 will-change-transform"
-        animate={{
-          x: [0, -50, 25, 0],
-          y: [0, 50, -25, 0],
-        }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        style={{ transform: 'translateZ(0)' }}
-      />
-
-      {/* Blob 3: Periwinkle */}
-      <motion.div
-        className="absolute bottom-[-20%] left-[20%] w-[80vw] h-[80vw] bg-[#637ab9] rounded-full mix-blend-screen filter blur-[80px] opacity-10 will-change-transform"
-        animate={{
-          x: [0, 75, -75, 0],
-          y: [0, -50, 50, 0],
-        }}
-        transition={{
-          duration: 35,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        style={{ transform: 'translateZ(0)' }}
-      />
-
-      {/* Static Grain Overlay */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+      {/* Static Grain Overlay - Removed blend mode for performance */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02]"></div>
       
       {/* Vignette */}
-      <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/20 to-[#0f1021] pointer-events-none" />
+      <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/10 to-[#0f1021]/80" />
     </div>
   );
 };
 
-export default FluidBackground;
+export default memo(FluidBackground);
