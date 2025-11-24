@@ -4,120 +4,31 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Ticket, Globe, Zap, Music, MapPin, Menu, X, Calendar, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu, X, Search, Users, Star, Database, ShieldCheck, Film, Tv, Radio } from 'lucide-react';
 import FluidBackground from './components/FluidBackground';
 import GradientText from './components/GlitchText';
 import CustomCursor from './components/CustomCursor';
-import ArtistCard from './components/ArtistCard';
-import AdContainer from './components/AdContainer';
-import { Artist } from './types';
-
-// Dummy Data
-const LINEUP: Artist[] = [
-  { 
-    id: '1', 
-    name: 'Neon Void', 
-    genre: 'Cyberpunk Synth', 
-    day: 'FRI 24', 
-    image: 'https://images.pexels.com/photos/1649691/pexels-photo-1649691.jpeg?_gl=1*i3xa2i*_ga*MjE0NTQyMDk5Mi4xNzYzMDYyMDM3*_ga_8JE65Q40S6*czE3NjMxNTk5MjAkbzYkZzEkdDE3NjMxNjE2MjkkajUxJGwwJGgw',
-    description: 'Architects of the audible abyss, weaving synth-heavy tapestries that explore the boundaries between digital and organic consciousness.'
-  },
-  { 
-    id: '2', 
-    name: 'Data Mosh', 
-    genre: 'Glitch Hop', 
-    day: 'FRI 24', 
-    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop',
-    description: 'Deconstructing the beat to rebuild it in high-definition chaos. Expect glitch textures, broken rhythms, and pure audio entropy.'
-  },
-  { 
-    id: '3', 
-    name: 'Ether Real', 
-    genre: 'Ethereal Techno', 
-    day: 'SAT 25', 
-    image: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=1000&auto=format&fit=crop',
-    description: 'Techno from a dimension of pure light. Hypnotic loops and ethereal vocals that float above a foundation of industrial bass.'
-  },
-  { 
-    id: '4', 
-    name: 'Hyper Loop', 
-    genre: 'Drum & Bass', 
-    day: 'SAT 25', 
-    image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000&auto=format&fit=crop',
-    description: 'High-velocity drum & bass that accelerates the heartbeat to match the tempo of the city\'s neon pulse.'
-  },
-  { 
-    id: '5', 
-    name: 'Digital Soul', 
-    genre: 'Deep House', 
-    day: 'SUN 26', 
-    image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1000&auto=format&fit=crop',
-    description: 'Deep, resonant house music that finds the ghost in the machine, blending soulful samples with futuristic sound design.'
-  },
-  { 
-    id: '6', 
-    name: 'Void Walker', 
-    genre: 'Dark Ambient', 
-    day: 'SUN 26', 
-    image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1000&auto=format&fit=crop',
-    description: 'Ambient soundscapes for the end of the world. A contemplative journey through dark matter and silence.'
-  },
-];
+import CountdownBanner from './components/CountdownBanner';
+import JoinWaitlist from './components/JoinWaitlist';
+import FaqSection from './components/FaqSection';
 
 const App: React.FC = () => {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  const [filterDay, setFilterDay] = useState('ALL');
   
-  const [purchasingIndex, setPurchasingIndex] = useState<number | null>(null);
-  const [purchasedIndex, setPurchasedIndex] = useState<number | null>(null);
+  const featureRef = useRef(null);
+  const { scrollYProgress: featureScroll } = useScroll({
+    target: featureRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const parallaxY = useTransform(featureScroll, [0, 1], [50, -50]);
+  const rotateX = useTransform(featureScroll, [0, 0.5, 1], [5, 0, -5]);
 
-  const filteredLineup = filterDay === 'ALL' 
-    ? LINEUP 
-    : LINEUP.filter(artist => artist.day === filterDay);
-
-  const navigateArtist = (direction: 'next' | 'prev') => {
-    if (!selectedArtist) return;
-    
-    // Navigate within the currently filtered list
-    // Fallback to full lineup if selected artist isn't in current filter (edge case)
-    const sourceList = filteredLineup.some(a => a.id === selectedArtist.id) ? filteredLineup : LINEUP;
-    
-    const currentIndex = sourceList.findIndex(a => a.id === selectedArtist.id);
-    let nextIndex;
-    if (direction === 'next') {
-      nextIndex = (currentIndex + 1) % sourceList.length;
-    } else {
-      nextIndex = (currentIndex - 1 + sourceList.length) % sourceList.length;
-    }
-    setSelectedArtist(sourceList[nextIndex]);
-  };
-
-  // Handle keyboard navigation for artist modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!selectedArtist) return;
-      if (e.key === 'ArrowLeft') navigateArtist('prev');
-      if (e.key === 'ArrowRight') navigateArtist('next');
-      if (e.key === 'Escape') setSelectedArtist(null);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedArtist, filterDay]); // Added filterDay dependency to ensure navigation uses correct list
-
-  const handlePurchase = (index: number) => {
-    setPurchasingIndex(index);
-    setTimeout(() => {
-      setPurchasingIndex(null);
-      setPurchasedIndex(index);
-    }, 3500);
-  };
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
@@ -135,457 +46,332 @@ const App: React.FC = () => {
   };
   
   return (
-    <div className="relative min-h-screen text-white selection:bg-[#4fb7b3] selection:text-black cursor-auto md:cursor-none overflow-x-hidden">
+    <div className="relative min-h-screen text-white selection:bg-[#4fb7b3] selection:text-black cursor-auto md:cursor-none overflow-x-hidden font-sans bg-[#0f1021]">
       <CustomCursor />
       <FluidBackground />
       
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-8 py-6 mix-blend-difference">
-        <div className="font-heading text-xl md:text-2xl font-bold tracking-tighter text-white cursor-default z-50">LUMINA</div>
-        
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-10 text-sm font-bold tracking-widest uppercase">
-          {['Lineup', 'Experience', 'Tickets'].map((item) => (
-            <button 
-              key={item} 
-              onClick={() => scrollToSection(item.toLowerCase())}
-              className="hover:text-[#a8fbd3] transition-colors text-white cursor-pointer bg-transparent border-none"
-              data-hover="true"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <button 
-          onClick={() => scrollToSection('tickets')}
-          className="hidden md:inline-block border border-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 text-white cursor-pointer bg-transparent"
-          data-hover="true"
-        >
-          Get Tickets
-        </button>
-
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="md:hidden text-white z-50 relative w-10 h-10 flex items-center justify-center"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-           {mobileMenuOpen ? <X /> : <Menu />}
-        </button>
-      </nav>
+      {/* Floating Navigation */}
+      <div className="fixed top-6 left-0 right-0 z-40 flex justify-center px-4">
+        <nav className="w-full max-w-5xl flex items-center justify-between px-6 py-3 bg-[#0f1021]/70 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all hover:border-white/20">
+          
+          {/* Logo */}
+          <div 
+            className="flex items-center gap-3 cursor-pointer z-50"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+             <img src="https://6924480f06fc1305af77f4b7--miroudbdbdnrnn.netlify.app/logo.png" alt="Filmfind Logo" className="h-8 md:h-10 w-auto object-contain" />
+             <span className="hidden md:block font-heading text-lg font-bold tracking-tighter text-white">FILMFIND</span>
+          </div>
+          
+          {/* Desktop Menu */}
+          <div className="hidden md:flex gap-8 text-xs font-bold tracking-widest uppercase items-center">
+            {['Discover', 'Features', 'Community', 'FAQ'].map((item) => (
+              <button 
+                key={item} 
+                onClick={() => scrollToSection(item.toLowerCase())}
+                className="relative hover:text-[#a8fbd3] transition-colors text-white/70 cursor-pointer bg-transparent border-none py-2"
+                data-hover="true"
+              >
+                {item}
+                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-[#a8fbd3] transition-all duration-300 hover:w-full"></span>
+              </button>
+            ))}
+             <a 
+               href="https://instagram.com/filmfind.online" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="hover:text-[#a8fbd3] transition-colors text-white/70 cursor-pointer"
+               data-hover="true"
+             >
+                Instagram
+             </a>
+          </div>
+          
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden text-white z-50 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </nav>
+      </div>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-30 bg-[#31326f]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden"
+            initial={{ opacity: 0, clipPath: "circle(0% at 100% 0%)" }}
+            animate={{ opacity: 1, clipPath: "circle(150% at 100% 0%)" }}
+            exit={{ opacity: 0, clipPath: "circle(0% at 100% 0%)" }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="fixed inset-0 z-30 bg-[#0f1021]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden"
           >
-            {['Lineup', 'Experience', 'Tickets'].map((item) => (
+            {['Discover', 'Features', 'Community', 'FAQ'].map((item) => (
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}
-                className="text-4xl font-heading font-bold text-white hover:text-[#a8fbd3] transition-colors uppercase bg-transparent border-none"
+                className="text-4xl font-heading font-bold text-white hover:text-[#a8fbd3] transition-colors uppercase bg-transparent border-none tracking-tighter"
               >
                 {item}
               </button>
             ))}
-            <button 
-              onClick={() => scrollToSection('tickets')}
-              className="mt-8 border border-white px-10 py-4 text-sm font-bold tracking-widest uppercase bg-white text-black"
-            >
-              Get Tickets
-            </button>
-            
-            <div className="absolute bottom-10 flex gap-6">
-               <a href="https://x.com/GoogleAIStudio" className="text-white/50 hover:text-white transition-colors">Twitter</a>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* HERO SECTION */}
-      <header className="relative h-[100svh] min-h-[600px] flex flex-col items-center justify-center overflow-hidden px-4">
+      <header id="discover" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4 pt-20">
         <motion.div 
           style={{ y, opacity }}
-          className="z-10 text-center flex flex-col items-center w-full max-w-6xl pb-24 md:pb-20"
+          className="z-10 text-center flex flex-col items-center w-full max-w-6xl pb-10"
         >
-           {/* Date / Location */}
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="flex items-center gap-3 md:gap-6 text-xs md:text-base font-mono text-[#a8fbd3] tracking-[0.2em] md:tracking-[0.3em] uppercase mb-4 bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-[#a8fbd3] tracking-[0.2em] uppercase mb-8 bg-white/5 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10 shadow-[0_0_20px_rgba(168,251,211,0.1)]"
           >
-            <span>Tokyo</span>
-            <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#4fb7b3] rounded-full animate-pulse"/>
-            <span>Oct 24-26</span>
+            <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" />
+            <span>Verified Secure • Family Friendly</span>
           </motion.div>
 
-          {/* Main Title */}
-          <div className="relative w-full flex justify-center items-center">
-            <GradientText 
-              text="LUMINA" 
-              as="h1" 
-              className="text-[15vw] md:text-[14vw] leading-[0.9] font-black tracking-tighter text-center" 
-            />
-            {/* Optimized Orb - Reduced Blur for Performance */}
-            <motion.div 
-               className="absolute -z-20 w-[50vw] h-[50vw] bg-white/5 blur-[40px] rounded-full pointer-events-none will-change-transform"
-               animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.3, 0.6, 0.3] }}
-               transition={{ duration: 6, repeat: Infinity }}
-               style={{ transform: 'translateZ(0)' }}
-            />
+          {/* Main Title with Stagger */}
+          <div className="relative mb-8 md:mb-10">
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
+              className="text-4xl md:text-8xl font-black tracking-tighter text-center leading-[1.1]"
+            >
+              Meet your <br/>
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <GradientText text="TV CONCIERGE" className="text-5xl md:text-9xl drop-shadow-[0_0_30px_rgba(79,183,179,0.3)]" />
+            </motion.div>
           </div>
-          
-          <motion.div
-             initial={{ scaleX: 0 }}
-             animate={{ scaleX: 1 }}
-             transition={{ duration: 1.5, delay: 0.5, ease: "circOut" }}
-             className="w-full max-w-md h-px bg-gradient-to-r from-transparent via-white/50 to-transparent mt-4 md:mt-8 mb-6 md:mb-8"
-          />
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 1 }}
-            className="text-base md:text-2xl font-light max-w-xl mx-auto text-white/90 leading-relaxed drop-shadow-lg px-4"
+            transition={{ delay: 0.4, duration: 1 }}
+            className="text-lg md:text-2xl font-light max-w-2xl mx-auto text-gray-300 leading-relaxed mb-12 md:mb-16"
           >
-            An immersive audiovisual odyssey
+            Need something to watch? We’re on it. Filmfind combines free movies & TV with the best streaming services, so there’s always more to discover.
           </motion.p>
+          
+          <CountdownBanner />
+          <JoinWaitlist />
+
         </motion.div>
 
-        {/* MARQUEE - SLOWED DOWN for Performance & Aesthetics */}
-        <div className="absolute bottom-12 md:bottom-16 left-0 w-full py-4 md:py-6 bg-white text-black z-20 overflow-hidden border-y-4 border-black shadow-[0_0_40px_rgba(255,255,255,0.4)]">
-          <motion.div 
-            className="flex w-fit will-change-transform"
-            animate={{ x: "-50%" }}
-            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          >
-            {/* Duplicate content for seamless loop */}
-            {[0, 1].map((key) => (
-              <div key={key} className="flex whitespace-nowrap shrink-0">
-                {[...Array(4)].map((_, i) => (
-                  <span key={i} className="text-3xl md:text-7xl font-heading font-black px-8 flex items-center gap-4">
-                    LUMINA 2025 <span className="text-black text-2xl md:text-4xl">●</span> 
-                    VISUAL EUPHORIA <span className="text-black text-2xl md:text-4xl">●</span> 
-                  </span>
-                ))}
-              </div>
+        {/* Stats Grid with Hover Effects */}
+        <div className="grid grid-cols-3 gap-4 md:gap-12 w-full max-w-5xl mt-12 border-t border-white/10 pt-8 px-4">
+            {[
+              { label: 'Movies & Shows', val: '180k+' },
+              { label: 'Services', val: '7+' },
+              { label: 'Ads', val: '0' },
+            ].map((stat, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 + (i * 0.1) }}
+                whileHover={{ scale: 1.05, textShadow: "0 0 10px rgba(255,255,255,0.5)" }}
+                className="text-center group cursor-default"
+              >
+                <div className="text-2xl md:text-5xl font-bold font-heading text-white mb-2 transition-colors group-hover:text-[#a8fbd3]">{stat.val}</div>
+                <div className="text-[10px] md:text-xs text-[#637ab9] uppercase tracking-widest font-mono">{stat.label}</div>
+              </motion.div>
             ))}
-          </motion.div>
         </div>
       </header>
 
-      {/* Ad Section 1 */}
-      <AdContainer />
-
-      {/* LINEUP SECTION */}
-      <section id="lineup" className="relative z-10 py-20 md:py-32">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 md:mb-16 px-4">
-             <h2 className="text-5xl md:text-8xl font-heading font-bold uppercase leading-[0.9] drop-shadow-lg break-words w-full md:w-auto">
-              Sonic <br/> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3]">Waves</span>
-            </h2>
-
-            {/* Filter Buttons */}
-            <div className="flex gap-3 mt-8 md:mt-0 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
-              {['ALL', 'FRI 24', 'SAT 25', 'SUN 26'].map((day) => (
-                <button
-                  key={day}
-                  onClick={() => setFilterDay(day)}
-                  className={`px-5 py-2 text-xs md:text-sm font-bold tracking-widest uppercase border transition-all duration-300 whitespace-nowrap ${
-                    filterDay === day 
-                      ? 'bg-[#a8fbd3] text-black border-[#a8fbd3] shadow-[0_0_20px_rgba(168,251,211,0.3)]' 
-                      : 'bg-transparent text-white/60 border-white/20 hover:border-white hover:text-white'
-                  }`}
-                  data-hover="true"
-                >
-                  {day === 'ALL' ? 'Full Lineup' : day}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm min-h-[400px]">
-            {filteredLineup.map((artist) => (
-              <ArtistCard key={artist.id} artist={artist} onClick={() => setSelectedArtist(artist)} />
-            ))}
-            {filteredLineup.length === 0 && (
-              <div className="col-span-full h-[400px] flex flex-col items-center justify-center text-white/30 gap-4">
-                <Music className="w-12 h-12 opacity-50" />
-                <p className="font-mono uppercase tracking-widest">No artists scheduled</p>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Ad Section 2 */}
-        <AdContainer />
-      </section>
-
-      {/* EXPERIENCE SECTION */}
-      <section id="experience" className="relative z-10 py-20 md:py-32 bg-black/20 backdrop-blur-sm border-t border-white/10 overflow-hidden">
-        {/* Decorative blurred circle - Optimized */}
-        <div className="absolute top-1/2 right-[-20%] w-[50vw] h-[50vw] bg-[#4fb7b3]/20 rounded-full blur-[40px] pointer-events-none will-change-transform" style={{ transform: 'translateZ(0)' }} />
-
-        <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 items-center">
-            <div className="lg:col-span-5 order-2 lg:order-1">
-              <h2 className="text-4xl md:text-7xl font-heading font-bold mb-6 md:mb-8 leading-tight">
-                Beyond <br/> <GradientText text="REALITY" className="text-5xl md:text-8xl" />
-              </h2>
-              <p className="text-lg md:text-xl text-gray-200 mb-8 md:mb-12 font-light leading-relaxed drop-shadow-md">
-                Lumina isn't just a festival; it's a sensory expedition. We fuse cutting-edge audio technology with generative art to create a living, breathing ecosystem of sound.
-              </p>
-              
-              <div className="space-y-6 md:space-y-8">
-                {[
-                  { icon: Globe, title: 'Starlight District', desc: 'Walk among 50ft tall light constructs.' },
-                  { icon: Zap, title: 'Neuro-Link Audio', desc: 'Haptic floors that sync with your heartbeat.' },
-                  { icon: Music, title: 'Infinite Stage', desc: 'AI-driven visuals that react to the crowd.' },
-                ].map((feature, i) => (
-                  <div
-                    key={i} 
-                    className="flex items-start gap-6"
-                  >
-                    <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/5">
-                      <feature.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg md:text-xl font-bold mb-1 md:mb-2 font-heading">{feature.title}</h4>
-                      <p className="text-sm text-gray-300">{feature.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 relative h-[400px] md:h-[700px] w-full order-1 lg:order-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#637ab9] to-[#4fb7b3] rounded-3xl rotate-3 opacity-30 blur-xl" />
-              <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10 group shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Crowd enjoying immersive light art at LUMINA 2025 Tokyo" 
-                  className="h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 will-change-transform" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
-                
-                <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
-                  <div className="text-5xl md:text-8xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/0 opacity-50">
-                    04
-                  </div>
-                  <div className="text-lg md:text-xl font-bold tracking-widest uppercase mt-2 text-white">
-                    Interactive Zones
-                  </div>
+      {/* FEATURES SECTION */}
+      <section id="features" ref={featureRef} className="relative z-10 py-20 md:py-32 bg-black/20 backdrop-blur-sm overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          {/* Feature 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center mb-32">
+             <motion.div 
+               initial={{ opacity: 0, x: -50 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true, margin: "-100px" }}
+               transition={{ duration: 0.8 }}
+               className="order-2 md:order-1"
+             >
+                <div className="w-12 h-12 bg-gradient-to-br from-white/10 to-transparent rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                   <Database className="w-6 h-6 text-[#a8fbd3]" />
                 </div>
-              </div>
-            </div>
+                <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 leading-tight">One list to rule them all.</h2>
+                <p className="text-gray-300 text-lg leading-relaxed mb-8">
+                  With a free Filmfind account you can keep a single, unified Watchlist for any movie or TV show you hear about, on any service—even theater releases! You can finally stop hopping between watchlists.
+                </p>
+             </motion.div>
+             
+             <motion.div 
+               style={{ y: parallaxY, rotateX: rotateX }}
+               className="order-1 md:order-2 relative h-[400px] md:h-[500px] bg-[#0f1021] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl group perspective-1000 flex items-center justify-center transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(168,251,211,0.15)] hover:border-[#a8fbd3]/30"
+             >
+                {/* Image is key focus here, used object-contain to show the UI element clearly */}
+                <img 
+                  src="https://www.plex.tv/wp-content/uploads/2023/05/pms-devices-image.png" 
+                  alt="Watchlist Interface" 
+                  className="w-full h-full object-contain p-8 hover:scale-105 transition-transform duration-700 drop-shadow-[0_0_30px_rgba(168,251,211,0.2)]" 
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0f1021] via-transparent to-transparent opacity-20" />
+             </motion.div>
           </div>
+
+          {/* Quote Block */}
+          <motion.div 
+             initial={{ opacity: 0, scale: 0.9 }}
+             whileInView={{ opacity: 1, scale: 1 }}
+             viewport={{ once: true }}
+             className="w-full bg-[#a8fbd3] text-black p-8 md:p-16 rounded-[2.5rem] text-center mb-32 relative overflow-hidden"
+          >
+             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-multiply" />
+             <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/30 rounded-full blur-3xl" />
+             
+             <div className="relative z-10 max-w-4xl mx-auto">
+               <Star className="w-12 h-12 mx-auto mb-8 text-black" />
+               <p className="text-2xl md:text-5xl font-heading font-bold mb-8 leading-tight tracking-tight">
+                 "It essentially makes the app the center of your streaming universe."
+               </p>
+               <div className="flex items-center justify-center gap-4">
+                 <span className="h-px w-12 bg-black/20"></span>
+                 <div className="font-mono uppercase tracking-widest text-sm font-bold">- The New York Times</div>
+                 <span className="h-px w-12 bg-black/20"></span>
+               </div>
+             </div>
+          </motion.div>
+
+          {/* Feature 2 - Discover */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center">
+             <motion.div 
+               style={{ y: useTransform(featureScroll, [0, 1], [-30, 30]) }}
+               className="relative h-[400px] md:h-[500px] bg-[#1f2048] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl group transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(99,122,185,0.25)] hover:border-[#637ab9]/30"
+             >
+                <img 
+                    src="https://www.plex.tv/wp-content/uploads/2025/02/home-sonic-apple-tv-02-21.png" 
+                    alt="Movies Discovery UI" 
+                    className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105" 
+                    loading="lazy"
+                />
+                {/* Subtle overlay for text contrast if needed, but keeping image clear */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
+                   <div className="flex gap-4 justify-center md:justify-start">
+                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+                        <Film className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+                        <Tv className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+                        <Radio className="w-6 h-6 text-white" />
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+             
+             <motion.div 
+               initial={{ opacity: 0, x: 50 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true }}
+               transition={{ duration: 0.8 }}
+             >
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                   <Search className="w-6 h-6 text-[#637ab9]" />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 leading-tight">It’s a great day to Discover.</h2>
+                <p className="text-gray-300 text-lg leading-relaxed mb-8">
+                  Select from the best streaming services to discover more, search faster, and get curated recommendations—all without ever leaving Filmfind.
+                </p>
+                <div className="space-y-4 mb-8">
+                  {['Movies & Shows', 'Live TV', 'Universal Search'].map((item, idx) => (
+                    <motion.div 
+                      key={item} 
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + (idx * 0.1) }}
+                      className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors cursor-default"
+                    >
+                       <span className="w-2 h-2 bg-[#4fb7b3] rounded-full shadow-[0_0_10px_#4fb7b3]" /> 
+                       <span className="font-bold tracking-wide">{item}</span>
+                    </motion.div>
+                  ))}
+                </div>
+             </motion.div>
+          </div>
+
         </div>
-        
-        {/* Ad Section 3 */}
-        <AdContainer />
       </section>
 
-      {/* TICKETS SECTION */}
-      <section id="tickets" className="relative z-10 py-20 md:py-32 px-4 md:px-6 bg-black/30 backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-20">
-             <h2 className="text-5xl md:text-9xl font-heading font-bold opacity-20 text-white">
-               ACCESS
-             </h2>
-             <p className="text-[#a8fbd3] font-mono uppercase tracking-widest -mt-3 md:-mt-8 relative z-10 text-sm md:text-base">
-               Secure your frequency
+      {/* COMMUNITY SECTION */}
+      <section id="community" className="relative z-10 py-20 px-6 bg-gradient-to-b from-transparent to-[#05060e]">
+        <div className="max-w-4xl mx-auto text-center">
+           <div className="inline-flex items-center justify-center p-4 bg-white/5 rounded-full mb-8 border border-white/10">
+             <Users className="w-8 h-8 text-white" />
+           </div>
+           <h2 className="text-3xl md:text-6xl font-heading font-bold mb-6">Find your friends.</h2>
+           <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+             What if you could find what to watch next based on ratings and activity from people you know in real life?
+           </p>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+              {[
+                { title: 'Search', desc: 'Find friends by name, location, or interest.' },
+                { title: 'Build', desc: 'Create a unified watchlist across services.' },
+                { title: 'Profile', desc: 'View watch stats and share your personality.' }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-[#0f1021] p-8 rounded-2xl border border-white/10 transition-all duration-300 group hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(79,183,179,0.2)] hover:bg-[#16172e] hover:border-[#4fb7b3]/50"
+                >
+                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-[#a8fbd3] transition-colors">{item.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))}
+           </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section id="faq" className="relative z-10 py-20">
+        <FaqSection />
+      </section>
+
+      <footer className="relative z-10 border-t border-white/10 py-12 bg-[#05060e]">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="text-center md:text-left">
+             <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
+               <img src="https://6924480f06fc1305af77f4b7--miroudbdbdnrnn.netlify.app/logo.png" alt="Filmfind" className="h-6 w-auto opacity-80" loading="lazy" />
+               <div className="font-heading text-xl font-bold tracking-tighter text-white">FILMFIND</div>
+             </div>
+             <p className="text-xs font-mono text-gray-500">
+               © 2025 Filmfind.online. All rights reserved.<br/>
+               We do not host explicit 18+ content.
              </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: 'Day Pass', price: '$149', color: 'white', accent: 'bg-white/5' },
-              { name: 'Weekend', price: '$349', color: 'teal', accent: 'bg-[#4fb7b3]/10 border-[#4fb7b3]/50' },
-              { name: 'Astral VIP', price: '$899', color: 'periwinkle', accent: 'bg-[#637ab9]/10 border-[#637ab9]/50' },
-            ].map((ticket, i) => {
-              const isPurchasing = purchasingIndex === i;
-              const isPurchased = purchasedIndex === i;
-              const isDisabled = (purchasingIndex !== null) || (purchasedIndex !== null);
-
-              return (
-                <motion.div
-                  key={i}
-                  whileHover={isDisabled ? {} : { y: -20 }}
-                  className={`relative p-8 md:p-10 border border-white/10 backdrop-blur-md flex flex-col min-h-[450px] md:min-h-[550px] transition-colors duration-300 ${ticket.accent} ${isDisabled && !isPurchased ? 'opacity-50 grayscale' : ''} will-change-transform`}
-                  data-hover={!isDisabled}
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  
-                  <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-heading font-bold mb-4 text-white">{ticket.name}</h3>
-                    <div className={`text-5xl md:text-6xl font-bold mb-8 md:mb-10 tracking-tighter ${ticket.color === 'white' ? 'text-white' : ticket.color === 'teal' ? 'text-[#4fb7b3]' : 'text-[#637ab9]'}`}>
-                      {ticket.price}
-                    </div>
-                    <ul className="space-y-4 md:space-y-6 text-sm text-gray-200">
-                      <li className="flex items-center gap-3"><Ticket className="w-5 h-5 text-gray-400" /> General Entry</li>
-                      <li className="flex items-center gap-3"><MapPin className="w-5 h-5 text-gray-400" /> All Stages</li>
-                      {i > 0 && <li className="flex items-center gap-3 text-white"><Zap className={`w-5 h-5 text-[#a8fbd3]`} /> Expedited Entry</li>}
-                      {i > 1 && <li className="flex items-center gap-3 text-white"><Globe className={`w-5 h-5 text-[#4fb7b3]`} /> Backstage Lounge</li>}
-                    </ul>
-                  </div>
-                  
-                  <button 
-                    onClick={() => handlePurchase(i)}
-                    disabled={isDisabled}
-                    className={`w-full py-4 text-sm font-bold uppercase tracking-[0.2em] border border-white/20 transition-all duration-300 mt-8 group overflow-hidden relative 
-                      ${isPurchased 
-                        ? 'bg-[#a8fbd3] text-black border-[#a8fbd3] cursor-default' 
-                        : isPurchasing 
-                          ? 'bg-white/20 text-white cursor-wait'
-                          : isDisabled 
-                            ? 'cursor-not-allowed opacity-50' 
-                            : 'text-white cursor-pointer hover:bg-white hover:text-black'
-                      }`}
-                  >
-                    <span className="relative z-10">
-                      {isPurchasing ? 'Purchasing...' : isPurchased ? 'Purchased' : 'Purchase'}
-                    </span>
-                    {/* Only show hover effect if actionable */}
-                    {!isDisabled && !isPurchased && !isPurchasing && (
-                      <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out -z-0" />
-                    )}
-                  </button>
-                  
-                  {isPurchased && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-center mt-3 text-white/40 font-mono"
-                    >
-                      Demo site: no purchase was made
-                    </motion.p>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-          
-          {/* Ad Section 4 */}
-          <AdContainer />
-        </div>
-      </section>
-
-      <footer className="relative z-10 border-t border-white/10 py-12 md:py-16 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-          <div>
-             <div className="font-heading text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white">LUMINA</div>
-             <div className="flex gap-2 text-xs font-mono text-gray-400">
-               <span>created by filmfind.online</span>
-             </div>
-          </div>
-          
-          <div className="flex gap-6 md:gap-8 flex-wrap">
-            <a href="https://x.com/GoogleAIStudio" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-colors cursor-pointer" data-hover="true">
-              Twitter
+          <div className="flex gap-6">
+            <a href="https://instagram.com/filmfind.online" className="text-gray-400 hover:text-[#E1306C] transition-colors transform hover:scale-110" aria-label="Instagram">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
             </a>
           </div>
         </div>
       </footer>
-
-      {/* Artist Detail Modal */}
-      <AnimatePresence>
-        {selectedArtist && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedArtist(null)}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md cursor-auto"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl bg-[#1a1b3b] border border-white/10 overflow-hidden flex flex-col md:flex-row shadow-2xl shadow-[#4fb7b3]/10 group/modal"
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedArtist(null)}
-                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors"
-                data-hover="true"
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              {/* Navigation Buttons */}
-              <button
-                onClick={(e) => { e.stopPropagation(); navigateArtist('prev'); }}
-                className="absolute left-4 bottom-4 translate-y-0 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors border border-white/10 backdrop-blur-sm"
-                data-hover="true"
-                aria-label="Previous Artist"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); navigateArtist('next'); }}
-                className="absolute right-4 bottom-4 translate-y-0 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors border border-white/10 backdrop-blur-sm md:right-8"
-                data-hover="true"
-                aria-label="Next Artist"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-
-              {/* Image Side */}
-              <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.img 
-                    key={selectedArtist.id}
-                    src={selectedArtist.image} 
-                    alt={selectedArtist.name} 
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </AnimatePresence>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1b3b] via-transparent to-transparent md:bg-gradient-to-r" />
-              </div>
-
-              {/* Content Side */}
-              <div className="w-full md:w-1/2 p-8 pb-24 md:p-12 flex flex-col justify-center relative">
-                <motion.div
-                  key={selectedArtist.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                >
-                  <div className="flex items-center gap-3 text-[#4fb7b3] mb-4">
-                     <Calendar className="w-4 h-4" />
-                     <span className="font-mono text-sm tracking-widest uppercase">{selectedArtist.day}</span>
-                  </div>
-                  
-                  <h3 className="text-4xl md:text-6xl font-heading font-bold uppercase leading-none mb-2 text-white">
-                    {selectedArtist.name}
-                  </h3>
-                  
-                  <p className="text-lg text-[#a8fbd3] font-medium tracking-widest uppercase mb-6">
-                    {selectedArtist.genre}
-                  </p>
-                  
-                  <div className="h-px w-20 bg-white/20 mb-6" />
-                  
-                  <p className="text-gray-300 leading-relaxed text-lg font-light mb-8">
-                    {selectedArtist.description}
-                  </p>
-                </motion.div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
