@@ -24,38 +24,38 @@ const JoinWaitlist: React.FC = () => {
 
       {/* Main Container */}
       <div className={`
-        relative p-2 rounded-full transition-all duration-500
+        relative p-1.5 sm:p-2 transition-all duration-500
         ${isFocused ? 'bg-gradient-to-r from-[#a8fbd3]/40 via-[#4fb7b3]/40 to-[#a8fbd3]/40 shadow-[0_0_40px_rgba(168,251,211,0.3)]' : 'bg-gradient-to-r from-white/10 via-white/5 to-white/10 border border-white/10'}
-        backdrop-blur-xl
+        backdrop-blur-xl rounded-2xl sm:rounded-full
       `}>
         <form 
           action="https://docs.google.com/forms/d/e/1FAIpQLScJChSiLay5Oa2p8c5AVSye_oO7xZqQau7MNACteFGo3y8Tgg/formResponse"
           method="POST"
           target="_blank"
-          className="relative flex flex-col sm:flex-row items-center gap-2 p-1 bg-[#0f1021]/90 rounded-full"
+          className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-2 p-3 sm:p-1 bg-[#0f1021]/90 rounded-xl sm:rounded-full"
         >
            {/* Input Wrapper */}
            <div className="relative w-full group flex-1">
-              <div className={`absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors duration-300 ${isFocused ? 'text-[#a8fbd3]' : 'text-gray-500'}`}>
+              <div className={`absolute inset-y-0 left-0 pl-4 sm:pl-6 flex items-center pointer-events-none transition-colors duration-300 ${isFocused ? 'text-[#a8fbd3]' : 'text-gray-500'}`}>
                 <Mail className="h-5 w-5" />
               </div>
               <input 
                 type="email" 
                 name="entry.280934693"
-                placeholder="Enter your email for early access"
+                placeholder="Enter your email"
                 required
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className="w-full pl-14 pr-4 py-4 bg-transparent border-none focus:outline-none text-white placeholder-gray-500 font-medium text-lg h-full rounded-full"
+                className="w-full pl-12 sm:pl-14 pr-4 py-3 sm:py-4 bg-white/5 sm:bg-transparent border border-white/5 sm:border-none focus:outline-none text-white placeholder-gray-500 font-medium text-base sm:text-lg h-full rounded-xl sm:rounded-full transition-colors"
               />
            </div>
            
            {/* Button */}
            <button 
                 type="submit"
-                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#4fb7b3] to-[#a8fbd3] hover:from-[#a8fbd3] hover:to-[#ffffff] text-[#0f1021] font-bold font-heading rounded-full transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(79,183,179,0.4)] hover:shadow-[0_0_40px_rgba(168,251,211,0.6)] hover:scale-105 whitespace-nowrap cursor-pointer relative overflow-hidden group/btn"
+                className="w-full sm:w-auto px-8 py-3 sm:py-4 bg-gradient-to-r from-[#4fb7b3] to-[#a8fbd3] hover:from-[#a8fbd3] hover:to-[#ffffff] text-[#0f1021] font-bold font-heading rounded-xl sm:rounded-full transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(79,183,179,0.4)] hover:shadow-[0_0_40px_rgba(168,251,211,0.6)] hover:scale-105 whitespace-nowrap cursor-pointer relative overflow-hidden group/btn"
               >
-                <span className="relative z-10 flex items-center gap-2">JOIN WAITLIST <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" /></span>
+                <span className="relative z-10 flex items-center gap-2 text-sm sm:text-base">JOIN WAITLIST <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform" /></span>
            </button>
         </form>
       </div>

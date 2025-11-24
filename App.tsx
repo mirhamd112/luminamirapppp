@@ -1,5 +1,4 @@
 
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -214,6 +213,22 @@ const App: React.FC = () => {
                 <p className="text-gray-300 text-lg leading-relaxed mb-8">
                   With a free Filmfind account you can keep a single, unified Watchlist for any movie or TV show you hear about, on any service—even theater releases! You can finally stop hopping between watchlists.
                 </p>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex justify-start"
+                >
+                  <a 
+                    href="https://tirikchilik.uz/mirhamid" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="donate-btn-animate inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3] text-[#0f1021] rounded-full text-sm font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(79,183,179,0.3)]"
+                  >
+                      <Heart className="w-4 h-4 fill-current heart-icon" />
+                      <span>Donate Support</span>
+                  </a>
+                </motion.div>
              </motion.div>
              
              <motion.div 
@@ -371,9 +386,9 @@ const App: React.FC = () => {
               href="https://tirikchilik.uz/mirhamid" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3] text-[#0f1021] rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_15px_rgba(79,183,179,0.4)]"
+              className="donate-btn-animate flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3] text-[#0f1021] rounded-full text-sm font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(79,183,179,0.4)]"
             >
-               <Heart className="w-3 h-3 fill-current" />
+               <Heart className="w-4 h-4 fill-current heart-icon" />
                <span>Donate</span>
             </a>
 
